@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Prediction Results{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-5 result-animation">
+        {% set result = prediction.result %}
+        {% set prediction_type = prediction.type %}
+        
+        {% if prediction_type == 'heart' %}
+            <h1><i class="fas fa-heartbeat text-danger me-3"></i>Heart Disease Prediction Results</h1>
+        {% elif prediction_type == 'diabetes' %}
+            <h1><i class="fas fa-tint text-primary me-3"></i>Diabetes Prediction Results</h1>
+        {% elif prediction_type == 'pneumonia' %}
+            <h1><i class="fas fa-lungs text-warning me-3"></i>Pneumonia Risk Assessment Results</h1>
+        {% endif %}
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mb-4">
+            <div class="card result-animation" style="animation-delay: 0.2s;">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-4">Prediction Result</h3>
+                    
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="risk-indicator risk-{{ result.risk_level | lower }}"></div>
+                        <h4 class="mb-0">
+                            {% if result.prediction %}
+                                {% if prediction_type == 'heart' %}
+                                    Your results indicate a high probability of heart disease.
+                                {% elif prediction_type == 'diabetes' %}
+                                    Your results indicate a high probability of diabetes.
+                                {% elif prediction_type == 'pneumonia' %}
+                                    Your results indicate a high probability of pneumonia.
+                                {% endif %}
+                            {% else %}
+                                {% if prediction_type == 'heart' %}
+                                    Your results indicate a low probability of heart disease.
+                                {% elif prediction_type == 'diabetes' %}
+                                    Your results indicate a low probability of diabetes.
+                                {% elif prediction_type == 'pneumonia' %}
+                                    Your results indicate a low probability of pneumonia.
+                                {% endif %}
+                            {% endif %}
+                        </h4>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-dark h-100">
+                                <div class="card-body p-3">
+                                    <h5 class="card-title">Risk Level: {{ result.risk_level }}</h5>
+                                    <div class="progress mt-2" style="height: 25px;">
+                                        {% set prob_percent = (result.probability * 100) | int %}
+                                        <div class="progress-bar bg-{{ 'danger' if prob_percent > 70 else ('warning' if prob_percent > 40 else 'success') }}" 
+                                            role="progressbar" 
+                                            style="width: {{ prob_percent }}%;" 
+                                            aria-valuenow="{{ prob_percent }}" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100">
+                                            {{ prob_percent }}%
+                                        </div>
+                                    </div>
+                                    <p class="mt-3 mb-0" id="prediction-probability" 
+                                       data-probability="{{ result.probability }}" 
+                                       data-type="{{ prediction_type }}">
+                                        This indicates a {{ result.probability * 100 | round(1) }}% probability of 
+                                        {% if prediction_type == 'heart' %}heart disease{% elif prediction_type == 'diabetes' %}diabetes{% else %}pneumonia{% endif %}.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-dark h-100">
+                                <div class="card-body p-3 d-flex flex-column">
+                                    <h5 class="card-title">Risk Visualization</h5>
+                                    <div class="flex-grow-1" style="position: relative; height: 150px;">
+                                        <canvas id="probabilityChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="mb-3">What This Means</h4>
+                    <p>
+                        {% if result.prediction %}
+                            {% if prediction_type == 'heart' %}
+                                Based on the provided health parameters, our model predicts an elevated risk of heart disease. This means you may benefit from a professional medical evaluation to further assess your cardiovascular health.
+                            {% elif prediction_type == 'diabetes' %}
+                                Based on the provided health parameters, our model predicts an elevated risk of diabetes. This suggests you may benefit from glucose testing and medical consultation to further assess your metabolic health.
+                            {% elif prediction_type == 'pneumonia' %}
+                                Based on the symptoms provided, our model predicts an elevated risk of pneumonia. This suggests you may need medical evaluation, potentially including a chest X-ray and physical examination.
+                            {% endif %}
+                        {% else %}
+                            {% if prediction_type == 'heart' %}
+                                Based on the provided health parameters, our model predicts a lower risk of heart disease. However, maintaining a heart-healthy lifestyle is still recommended.
+                            {% elif prediction_type == 'diabetes' %}
+                                Based on the provided health parameters, our model predicts a lower risk of diabetes. Maintaining a healthy lifestyle is still important for prevention.
+                            {% elif prediction_type == 'pneumonia' %}
+                                Based on the symptoms provided, our model predicts a lower risk of pneumonia. However, if symptoms persist or worsen, medical evaluation is recommended.
+                            {% endif %}
+                        {% endif %}
+                    </p>
+                    
+                    <div class="alert alert-info mt-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="alert-heading">Important Note</h5>
+                                <p class="mb-0">This prediction is based on a machine learning model and should not be considered a medical diagnosis. Please consult with a healthcare professional for proper diagnosis and treatment.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary me-md-2">Back to Home</a>
+                        
+                        {% if prediction_type == 'heart' %}
+                            <a href="{{ url_for('heart_disease') }}" class="btn btn-outline-light">New Heart Assessment</a>
+                        {% elif prediction_type == 'diabetes' %}
+                            <a href="{{ url_for('diabetes') }}" class="btn btn-outline-light">New Diabetes Assessment</a>
+                        {% elif prediction_type == 'pneumonia' %}
+                            <a href="{{ url_for('pneumonia') }}" class="btn btn-outline-light">New Pneumonia Assessment</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card disease-info result-animation" style="animation-delay: 0.4s;">
+                <div class="card-body">
+                    <h3 class="card-title mb-3">{{ result.info.name }} Information</h3>
+                    <p>{{ result.info.description }}</p>
+                    
+                    <h5 class="mt-4">Common Symptoms:</h5>
+                    <ul class="mb-4">
+                        {% for symptom in result.info.symptoms %}
+                            <li>{{ symptom }}</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <h5>Prevention:</h5>
+                    <ul>
+                        {% for prevention in result.info.prevention %}
+                            <li>{{ prevention }}</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <div class="mt-4">
+                        {% if prediction_type == 'heart' %}
+                            <a href="https://www.heart.org/" target="_blank" class="btn btn-sm btn-outline-light">Learn more at American Heart Association</a>
+                        {% elif prediction_type == 'diabetes' %}
+                            <a href="https://diabetes.org/" target="_blank" class="btn btn-sm btn-outline-light">Learn more at American Diabetes Association</a>
+                        {% elif prediction_type == 'pneumonia' %}
+                            <a href="https://www.lung.org/lung-health-diseases/lung-disease-lookup/pneumonia" target="_blank" class="btn btn-sm btn-outline-light">Learn more at American Lung Association</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            {% if result.risk_level == 'High' %}
+                <div class="card mt-4 bg-danger text-white result-animation" style="animation-delay: 0.6s;">
+                    <div class="card-body">
+                        <h4 class="card-title">Next Steps</h4>
+                        <p>With a high risk assessment, it's recommended that you:</p>
+                        <ul>
+                            <li>Consult with a healthcare provider soon</li>
+                            <li>Discuss these results with your doctor</li>
+                            <li>Consider additional testing</li>
+                            <li>Review your lifestyle and potential changes</li>
+                        </ul>
+                    </div>
+                </div>
+            {% elif result.risk_level == 'Moderate' %}
+                <div class="card mt-4 bg-warning result-animation" style="animation-delay: 0.6s;">
+                    <div class="card-body">
+                        <h4 class="card-title">Next Steps</h4>
+                        <p>With a moderate risk assessment, it's recommended that you:</p>
+                        <ul>
+                            <li>Discuss these results at your next doctor's visit</li>
+                            <li>Monitor your symptoms</li>
+                            <li>Consider lifestyle modifications</li>
+                            <li>Learn more about prevention</li>
+                        </ul>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card mt-4 bg-success text-white result-animation" style="animation-delay: 0.6s;">
+                    <div class="card-body">
+                        <h4 class="card-title">Next Steps</h4>
+                        <p>Even with a low risk assessment, remember to:</p>
+                        <ul>
+                            <li>Continue regular health check-ups</li>
+                            <li>Maintain a healthy lifestyle</li>
+                            <li>Stay aware of any changing symptoms</li>
+                            <li>Follow preventive health guidelines</li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

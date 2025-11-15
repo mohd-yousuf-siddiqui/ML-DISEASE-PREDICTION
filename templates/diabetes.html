@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Diabetes Prediction{% endblock %}
+
+{% block content %}
+<div class="container my-5 form-container">
+    <div class="text-center mb-5">
+        <h1><i class="fas fa-tint text-primary me-3"></i>Diabetes Risk Assessment</h1>
+        <p class="lead">Enter your health parameters to evaluate your diabetes risk.</p>
+    </div>
+    
+    <div class="card">
+        <div class="card-body p-4">
+            <form method="POST" action="{{ url_for('diabetes') }}">
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="pregnancies" class="form-label">Number of Pregnancies</label>
+                        <input type="number" class="form-control {% if errors and errors.get('pregnancies') %}is-invalid{% endif %}" 
+                            id="pregnancies" name="pregnancies" min="0" max="20" 
+                            value="{{ form_data.get('pregnancies', '0') }}" required>
+                        {% if errors and errors.get('pregnancies') %}
+                        <div class="invalid-feedback">{{ errors.get('pregnancies') }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Enter 0 if male or no pregnancies</small>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="glucose" class="form-label">Plasma Glucose Concentration (mg/dl)</label>
+                        <input type="number" class="form-control {% if errors and errors.get('glucose') %}is-invalid{% endif %}" 
+                            id="glucose" name="glucose" min="0" max="300" 
+                            value="{{ form_data.get('glucose', '') }}" required>
+                        {% if errors and errors.get('glucose') %}
+                        <div class="invalid-feedback">{{ errors.get('glucose') }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">2-Hour glucose tolerance test result</small>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="blood_pressure" class="form-label">Blood Pressure (mm Hg)</label>
+                        <input type="number" class="form-control {% if errors and errors.get('blood_pressure') %}is-invalid{% endif %}" 
+                            id="blood_pressure" name="blood_pressure" min="0" max="200" 
+                            value="{{ form_data.get('blood_pressure', '') }}" required>
+                        {% if errors and errors.get('blood_pressure') %}
+                        <div class="invalid-feedback">{{ errors.get('blood_pressure') }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Diastolic blood pressure</small>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="skin_thickness" class="form-label">Skin Thickness (mm)</label>
+                        <input type="number" class="form-control {% if errors and errors.get('skin_thickness') %}is-invalid{% endif %}" 
+                            id="skin_thickness" name="skin_thickness" min="0" max="100" 
+                            value="{{ form_data.get('skin_thickness', '') }}" required>
+                        {% if errors and errors.get('skin_thickness') %}
+                        <div class="invalid-feedback">{{ errors.get('skin_thickness') }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Triceps skin fold thickness</small>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="insulin" class="form-label">2-Hour Serum Insulin (mu U/ml)</label>
+                        <input type="number" class="form-control {% if errors and errors.get('insulin') %}is-invalid{% endif %}" 
+                            id="insulin" name="insulin" min="0" max="900" 
+                            value="{{ form_data.get('insulin', '') }}" required>
+                        {% if errors and errors.get('insulin') %}
+                        <div class="invalid-feedback">{{ errors.get('insulin') }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="age" class="form-label">Age (years)</label>
+                        <input type="number" class="form-control {% if errors and errors.get('age') %}is-invalid{% endif %}" 
+                            id="age" name="age" min="1" max="120" 
+                            value="{{ form_data.get('age', '') }}" required>
+                        {% if errors and errors.get('age') %}
+                        <div class="invalid-feedback">{{ errors.get('age') }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="diabetes_pedigree" class="form-label">Diabetes Pedigree Function</label>
+                        <input type="number" step="0.001" class="form-control {% if errors and errors.get('diabetes_pedigree') %}is-invalid{% endif %}" 
+                            id="diabetes_pedigree" name="diabetes_pedigree" min="0.001" max="3.000" 
+                            value="{{ form_data.get('diabetes_pedigree', '') }}" required>
+                        {% if errors and errors.get('diabetes_pedigree') %}
+                        <div class="invalid-feedback">{{ errors.get('diabetes_pedigree') }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Diabetes likelihood based on family history (0.001-3.000)</small>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <label class="form-label">BMI Calculator (kg/m²)</label>
+                                <div class="row g-3 mb-2">
+                                    <div class="col">
+                                        <label for="weight" class="form-label small">Weight (kg)</label>
+                                        <input type="number" step="0.1" class="form-control form-control-sm" id="weight" min="30" max="300">
+                                    </div>
+                                    <div class="col">
+                                        <label for="height" class="form-label small">Height (cm)</label>
+                                        <input type="number" step="1" class="form-control form-control-sm" id="height" min="100" max="250">
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span>BMI: <span id="bmi-result">-</span></span>
+                                    <input type="hidden" id="bmi" name="bmi" value="{{ form_data.get('bmi', '') }}" required>
+                                    {% if errors and errors.get('bmi') %}
+                                    <div class="text-danger small">{{ errors.get('bmi') }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Predict Diabetes Risk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card mt-4 bg-dark">
+        <div class="card-body">
+            <h3 class="card-title">About Diabetes Prediction</h3>
+            <p>This diabetes prediction tool uses a machine learning model trained on the Pima Indians Diabetes Dataset, which is widely used in machine learning for diabetes prediction.</p>
+            
+            <h4 class="mt-4">Understanding the Parameters:</h4>
+            <ul>
+                <li><strong>Pregnancies:</strong> Number of times pregnant - can affect insulin resistance.</li>
+                <li><strong>Glucose:</strong> Plasma glucose concentration in an oral glucose tolerance test - high levels can indicate diabetes.</li>
+                <li><strong>Blood Pressure:</strong> Diastolic blood pressure (mm Hg) - hypertension is often comorbid with diabetes.</li>
+                <li><strong>Skin Thickness:</strong> Triceps skin fold thickness (mm) - a measure of body fat.</li>
+                <li><strong>Insulin:</strong> 2-Hour serum insulin (mu U/ml) - abnormal levels can indicate insulin resistance or deficiency.</li>
+                <li><strong>BMI:</strong> Body Mass Index - weight in kg/(height in m)² - obesity increases risk of type 2 diabetes.</li>
+                <li><strong>Diabetes Pedigree Function:</strong> A function that scores likelihood of diabetes based on family history.</li>
+                <li><strong>Age:</strong> Age in years - risk increases with age.</li>
+            </ul>
+            
+            <h4 class="mt-4">Diabetes Risk Factors:</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Type 1 Diabetes:</h5>
+                    <ul>
+                        <li>Family history of diabetes</li>
+                        <li>Certain genetic factors</li>
+                        <li>Environmental triggers</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>Type 2 Diabetes:</h5>
+                    <ul>
+                        <li>Overweight or obesity</li>
+                        <li>Physical inactivity</li>
+                        <li>Family history of diabetes</li>
+                        <li>Age (risk increases with age)</li>
+                        <li>High blood pressure</li>
+                        <li>Abnormal cholesterol levels</li>
+                        <li>History of gestational diabetes</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-info-circle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="alert-heading">Important Note</h5>
+                        <p class="mb-0">This prediction is based on statistical models and should not replace professional medical advice. Always consult with a healthcare provider for proper diagnosis and treatment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

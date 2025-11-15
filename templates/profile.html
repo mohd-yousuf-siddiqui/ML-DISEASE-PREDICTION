@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Disease Prediction System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-dark mb-4">
+                <div class="card-header bg-dark">
+                    <h2 class="mb-0">
+                        <i class="fas fa-user me-2"></i>User Profile
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Account Information</h4>
+                            <p><strong>Username:</strong> {{ current_user.username }}</p>
+                            <p><strong>Email:</strong> {{ current_user.email }}</p>
+                            <p><strong>Member Since:</strong> {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                            <p><strong>Account Type:</strong> {% if current_user.is_admin %}Administrator{% else %}Standard User{% endif %}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Usage Statistics</h4>
+                            <p><strong>Total Predictions:</strong> {{ predictions|length }}</p>
+                            
+                            {% set heart_count = predictions|selectattr('prediction_type', 'equalto', 'heart')|list|length %}
+                            {% set diabetes_count = predictions|selectattr('prediction_type', 'equalto', 'diabetes')|list|length %}
+                            {% set pneumonia_count = predictions|selectattr('prediction_type', 'equalto', 'pneumonia')|list|length %}
+                            
+                            <p><strong>Heart Disease Predictions:</strong> {{ heart_count }}</p>
+                            <p><strong>Diabetes Predictions:</strong> {{ diabetes_count }}</p>
+                            <p><strong>Pneumonia Predictions:</strong> {{ pneumonia_count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-dark">
+                <div class="card-header bg-dark">
+                    <h3 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Prediction History
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if predictions %}
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Prediction Type</th>
+                                        <th>Result</th>
+                                        <th>Confidence</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prediction in predictions %}
+                                    <tr>
+                                        <td>{{ prediction.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if prediction.prediction_type == 'heart' %}
+                                                <span class="badge bg-danger">Heart Disease</span>
+                                            {% elif prediction.prediction_type == 'diabetes' %}
+                                                <span class="badge bg-warning">Diabetes</span>
+                                            {% elif prediction.prediction_type == 'pneumonia' %}
+                                                <span class="badge bg-info">Pneumonia</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ prediction.result }}</td>
+                                        <td>
+                                            {% if prediction.confidence %}
+                                                {{ "%.2f"|format(prediction.confidence * 100) }}%
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#predictionModal{{ prediction.id }}">
+                                                <i class="fas fa-info-circle"></i> View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Prediction Detail Modals -->
+                        {% for prediction in predictions %}
+                        <div class="modal fade" id="predictionModal{{ prediction.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content bg-dark">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            {% if prediction.prediction_type == 'heart' %}
+                                                Heart Disease Prediction Details
+                                            {% elif prediction.prediction_type == 'diabetes' %}
+                                                Diabetes Prediction Details
+                                            {% elif prediction.prediction_type == 'pneumonia' %}
+                                                Pneumonia Prediction Details
+                                            {% endif %}
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Date:</strong> {{ prediction.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                                        <p><strong>Result:</strong> {{ prediction.result }}</p>
+                                        <p><strong>Confidence:</strong> 
+                                            {% if prediction.confidence %}
+                                                {{ "%.2f"|format(prediction.confidence * 100) }}%
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </p>
+                                        
+                                        <h6 class="mt-4">Input Parameters:</h6>
+                                        <div class="bg-secondary p-3 rounded">
+                                            <pre>{{ prediction.input_data }}</pre>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>You haven't made any predictions yet. 
+                            Try out our prediction tools to see your history here!
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="card mb-3 bg-secondary">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-heartbeat fa-3x mb-3 text-danger"></i>
+                                        <h5>Heart Disease Prediction</h5>
+                                        <p>Analyze your risk for heart disease</p>
+                                        <a href="{{ url_for('heart_disease') }}" class="btn btn-danger">Try Now</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card mb-3 bg-secondary">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-prescription fa-3x mb-3 text-warning"></i>
+                                        <h5>Diabetes Prediction</h5>
+                                        <p>Check your diabetes risk factors</p>
+                                        <a href="{{ url_for('diabetes') }}" class="btn btn-warning">Try Now</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card mb-3 bg-secondary">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-lungs fa-3x mb-3 text-info"></i>
+                                        <h5>Pneumonia Detection</h5>
+                                        <p>Analyze symptoms for pneumonia risk</p>
+                                        <a href="{{ url_for('pneumonia') }}" class="btn btn-info">Try Now</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

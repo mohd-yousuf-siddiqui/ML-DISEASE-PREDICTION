@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Data Flow Diagram - Disease Prediction System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-4">Disease Prediction System</h1>
+            <h2 class="text-center mb-5">Data Flow Diagram</h2>
+            
+            <div class="card bg-dark mb-5">
+                <div class="card-body">
+                    <div class="diagram-container text-center">
+                        <img src="{{ url_for('static', filename='data_flow_diagram.svg') }}" alt="Data Flow Diagram" class="img-fluid" style="max-width: 100%;">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-dark mb-4">
+                <div class="card-header bg-dark">
+                    <h3>Understanding the Data Flow</h3>
+                </div>
+                <div class="card-body">
+                    <p>Our disease prediction system follows a structured multi-layered architecture. Below is a detailed explanation of how data flows through the system:</p>
+                    
+                    <h4 class="mt-4">1. User Interface Layer</h4>
+                    <p>This is where users interact with the system, providing their health data through specialized forms:</p>
+                    <ul>
+                        <li><strong>Heart Disease Form:</strong> Collects cardiovascular risk parameters</li>
+                        <li><strong>Diabetes Form:</strong> Gathers metabolic health indicators</li>
+                        <li><strong>Pneumonia Form:</strong> Captures respiratory health information</li>
+                        <li><strong>Results Display:</strong> Shows prediction outcomes in an understandable format</li>
+                        <li><strong>Error Messages:</strong> Provides feedback when issues occur</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">2. Application Logic Layer</h4>
+                    <p>The Flask backend manages routing, processes form submissions, and directs data flow:</p>
+                    <ul>
+                        <li><strong>Disease-Specific Routes:</strong> Each disease has a dedicated endpoint that receives form data</li>
+                        <li><strong>Form Validation:</strong> Data is cleaned and validated before processing</li>
+                        <li><strong>Results Route:</strong> Manages the display of prediction outcomes</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">3. Service Layer</h4>
+                    <p>This layer contains the machine learning models that analyze the health data:</p>
+                    <ul>
+                        <li><strong>Heart Disease Model:</strong> Uses RandomForestClassifier to predict cardiovascular risk</li>
+                        <li><strong>Diabetes Model:</strong> Uses LogisticRegression to assess diabetes probability</li>
+                        <li><strong>Pneumonia Model:</strong> Employs RandomForestClassifier for respiratory analysis</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">4. Data Persistence Layer</h4>
+                    <p>Storage for user data and prediction results:</p>
+                    <ul>
+                        <li><strong>User and Prediction Database:</strong> SQLite database storing user profiles and their prediction history</li>
+                        <li><strong>Session Storage:</strong> Temporarily holds prediction results for the current user session</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card bg-dark">
+                <div class="card-header bg-dark">
+                    <h3>Data Flow Process</h3>
+                </div>
+                <div class="card-body">
+                    <h5>From Input to Results:</h5>
+                    <ol>
+                        <li><strong>Data Collection:</strong> User submits health parameters through a disease-specific form</li>
+                        <li><strong>Validation:</strong> The system validates and cleans the input data</li>
+                        <li><strong>Processing:</strong> Validated data is passed to the appropriate ML model</li>
+                        <li><strong>Prediction:</strong> The model generates a prediction with confidence level</li>
+                        <li><strong>Storage:</strong> Results are stored in the database and session</li>
+                        <li><strong>Presentation:</strong> User is redirected to results page showing prediction outcome</li>
+                    </ol>
+                    
+                    <h5 class="mt-4">Security and Privacy:</h5>
+                    <ul>
+                        <li>User data is securely stored with proper session management</li>
+                        <li>Password information is hashed before storage</li>
+                        <li>Input data validation helps prevent injection attacks</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

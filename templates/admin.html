@@ -1,0 +1,420 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Disease Prediction System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-dark mb-4">
+                <div class="card-header bg-dark">
+                    <h2>
+                        <i class="fas fa-user-shield me-2"></i>Admin Panel
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-secondary mb-3">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-3x mb-3"></i>
+                                    <h5 class="card-title">Total Users</h5>
+                                    <p class="card-text display-4">{{ users|length }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-secondary mb-3">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                    <h5 class="card-title">Total Predictions</h5>
+                                    <p class="card-text display-4">{{ predictions|length }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-secondary mb-3">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-calendar-alt fa-3x mb-3"></i>
+                                    <h5 class="card-title">Last 24 Hours</h5>
+                                    {% set recent_predictions = predictions|selectattr('created_at', 'ge', now_minus_24h)|list %}
+                                    <p class="card-text display-4">{{ recent_predictions|length }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nav tabs for admin panels -->
+            <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true">
+                        <i class="fas fa-users me-2"></i>Users
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="predictions-tab" data-bs-toggle="tab" data-bs-target="#predictions" type="button" role="tab" aria-controls="predictions" aria-selected="false">
+                        <i class="fas fa-chart-line me-2"></i>Predictions
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab" aria-controls="analytics" aria-selected="false">
+                        <i class="fas fa-chart-pie me-2"></i>Analytics
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <!-- Users Tab -->
+                <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
+                    <div class="card bg-dark">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Registered Users</h4>
+                            <input type="text" id="userSearch" class="form-control w-25" placeholder="Search users...">
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover" id="usersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Joined</th>
+                                            <th>Predictions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for user in users %}
+                                        <tr>
+                                            <td>{{ user.id }}</td>
+                                            <td>{{ user.username }}</td>
+                                            <td>{{ user.email }}</td>
+                                            <td>
+                                                {% if user.is_admin %}
+                                                <span class="badge bg-danger">Admin</span>
+                                                {% else %}
+                                                <span class="badge bg-primary">User</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                            <td>
+                                                {% set user_predictions = predictions|selectattr('user_id', 'equalto', user.id)|list %}
+                                                {{ user_predictions|length }}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Predictions Tab -->
+                <div class="tab-pane fade" id="predictions" role="tabpanel" aria-labelledby="predictions-tab">
+                    <div class="card bg-dark">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">All Predictions</h4>
+                            <input type="text" id="predictionSearch" class="form-control w-25" placeholder="Search predictions...">
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover" id="predictionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>User</th>
+                                            <th>Type</th>
+                                            <th>Result</th>
+                                            <th>Confidence</th>
+                                            <th>Date</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for prediction in predictions %}
+                                        <tr>
+                                            <td>{{ prediction.id }}</td>
+                                            <td>
+                                                {% if prediction.user_id %}
+                                                    {% set pred_user = users|selectattr('id', 'equalto', prediction.user_id)|first %}
+                                                    {% if pred_user %}
+                                                        {{ pred_user.username }}
+                                                    {% else %}
+                                                        Unknown
+                                                    {% endif %}
+                                                {% else %}
+                                                    Guest
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if prediction.prediction_type == 'heart' %}
+                                                    <span class="badge bg-danger">Heart Disease</span>
+                                                {% elif prediction.prediction_type == 'diabetes' %}
+                                                    <span class="badge bg-warning">Diabetes</span>
+                                                {% elif prediction.prediction_type == 'pneumonia' %}
+                                                    <span class="badge bg-info">Pneumonia</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ prediction.result }}</td>
+                                            <td>
+                                                {% if prediction.confidence %}
+                                                    {{ "%.2f"|format(prediction.confidence * 100) }}%
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ prediction.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#adminPredModal{{ prediction.id }}">
+                                                    <i class="fas fa-info-circle"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Tab -->
+                <div class="tab-pane fade" id="analytics" role="tabpanel" aria-labelledby="analytics-tab">
+                    <div class="card bg-dark">
+                        <div class="card-header">
+                            <h4 class="mb-0">Prediction Analytics</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card bg-secondary mb-4">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Prediction Types Distribution</h5>
+                                            <canvas id="predictionTypesChart" height="250"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-secondary mb-4">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Prediction Results Distribution</h5>
+                                            <canvas id="predictionResultsChart" height="250"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card bg-secondary">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Predictions Over Time</h5>
+                                            <canvas id="predictionsTimeChart" height="250"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prediction Detail Modals -->
+{% for prediction in predictions %}
+<div class="modal fade" id="adminPredModal{{ prediction.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {% if prediction.prediction_type == 'heart' %}
+                        Heart Disease Prediction Details
+                    {% elif prediction.prediction_type == 'diabetes' %}
+                        Diabetes Prediction Details
+                    {% elif prediction.prediction_type == 'pneumonia' %}
+                        Pneumonia Prediction Details
+                    {% endif %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>ID:</strong> {{ prediction.id }}</p>
+                <p><strong>User:</strong> 
+                    {% if prediction.user_id %}
+                        {% set pred_user = users|selectattr('id', 'equalto', prediction.user_id)|first %}
+                        {% if pred_user %}
+                            {{ pred_user.username }} (ID: {{ prediction.user_id }})
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    {% else %}
+                        Guest
+                    {% endif %}
+                </p>
+                <p><strong>Date:</strong> {{ prediction.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <p><strong>Result:</strong> {{ prediction.result }}</p>
+                <p><strong>Confidence:</strong> 
+                    {% if prediction.confidence %}
+                        {{ "%.2f"|format(prediction.confidence * 100) }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+                
+                <h6 class="mt-4">Input Parameters:</h6>
+                <div class="bg-secondary p-3 rounded">
+                    <pre>{{ prediction.input_data }}</pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // User table search functionality
+    document.getElementById('userSearch').addEventListener('keyup', function() {
+        let searchText = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#usersTable tbody tr');
+        
+        rows.forEach(row => {
+            let found = false;
+            row.querySelectorAll('td').forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(searchText)) {
+                    found = true;
+                }
+            });
+            row.style.display = found ? '' : 'none';
+        });
+    });
+    
+    // Prediction table search functionality
+    document.getElementById('predictionSearch').addEventListener('keyup', function() {
+        let searchText = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#predictionsTable tbody tr');
+        
+        rows.forEach(row => {
+            let found = false;
+            row.querySelectorAll('td').forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(searchText)) {
+                    found = true;
+                }
+            });
+            row.style.display = found ? '' : 'none';
+        });
+    });
+    
+    // Charts for analytics tab
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only initialize charts when analytics tab is shown
+        document.getElementById('analytics-tab').addEventListener('shown.bs.tab', function() {
+            initAnalyticsCharts();
+        });
+    });
+    
+    function initAnalyticsCharts() {
+        // Prediction Types Distribution Chart
+        {% set heart_count = predictions|selectattr('prediction_type', 'equalto', 'heart')|list|length %}
+        {% set diabetes_count = predictions|selectattr('prediction_type', 'equalto', 'diabetes')|list|length %}
+        {% set pneumonia_count = predictions|selectattr('prediction_type', 'equalto', 'pneumonia')|list|length %}
+        
+        new Chart(document.getElementById('predictionTypesChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Heart Disease', 'Diabetes', 'Pneumonia'],
+                datasets: [{
+                    data: [{{ heart_count }}, {{ diabetes_count }}, {{ pneumonia_count }}],
+                    backgroundColor: ['#dc3545', '#ffc107', '#17a2b8']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Prediction Results Distribution Chart
+        {% set positive_results = 0 %}
+        {% for prediction in predictions %}
+            {% if prediction.result and (
+                'positive' in prediction.result|lower or 
+                'high risk' in prediction.result|lower or 
+                'detected' in prediction.result|lower
+            ) %}
+                {% set positive_results = positive_results + 1 %}
+            {% endif %}
+        {% endfor %}
+        {% set negative_results = predictions|length - positive_results %}
+        
+        new Chart(document.getElementById('predictionResultsChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Positive/High Risk', 'Negative/Low Risk'],
+                datasets: [{
+                    data: [{{ positive_results }}, {{ negative_results }}],
+                    backgroundColor: ['#dc3545', '#28a745']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Predictions Over Time Chart (using last 7 days for example)
+        // In a real application, you'd generate this data on the server
+        new Chart(document.getElementById('predictionsTimeChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [
+                    'Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'
+                ],
+                datasets: [{
+                    label: 'Number of Predictions',
+                    data: [
+                        {{ predictions|length // 7 }},
+                        {{ (predictions|length // 7) * 2 }},
+                        {{ (predictions|length // 7) * 1.5 }},
+                        {{ (predictions|length // 7) * 3 }},
+                        {{ (predictions|length // 7) * 2.5 }},
+                        {{ (predictions|length // 7) * 2 }},
+                        {{ predictions|length }}
+                    ],
+                    borderColor: '#7952b3',
+                    backgroundColor: 'rgba(121, 82, 179, 0.2)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

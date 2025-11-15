@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}About the Disease Prediction System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1>About the Disease Prediction System</h1>
+        <p class="lead">Understanding how our ML based health prediction tools work</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Our Mission</h2>
+                    <p>The Disease Prediction System aims to leverage machine learning to help individuals identify potential health risks early. By analyzing various health parameters and symptoms, our models can predict the likelihood of certain diseases, empowering users to take proactive steps towards better health.</p>
+                    
+                    <p>It's important to note that this system is designed for educational purposes and to promote health awareness. It does not replace professional medical diagnosis or treatment.</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">How It Works</h2>
+                    <p>Our disease prediction system utilizes supervised machine learning models trained on established medical datasets from Kaggle and other sources. Here's how the process works:</p>
+                    
+                    <ol>
+                        <li class="mb-2"><strong>Data Collection:</strong> Users input relevant health parameters or symptoms through our user-friendly forms.</li>
+                        <li class="mb-2"><strong>Data Preprocessing:</strong> The system normalizes and processes this data to match the format our models were trained on.</li>
+                        <li class="mb-2"><strong>Model Prediction:</strong> Our machine learning models analyze the processed data to generate risk predictions.</li>
+                        <li class="mb-2"><strong>Results Interpretation:</strong> The system presents predictions in an understandable format with appropriate context and guidance.</li>
+                    </ol>
+                    
+                    <h3 class="mt-4">Our Models</h3>
+                    <p>We currently offer three prediction tools:</p>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 bg-dark">
+                                <div class="card-body">
+                                    <h4 class="card-title text-danger">Heart Disease</h4>
+                                    <p class="card-text">Uses a Random Forest classifier trained on the Cleveland Heart Disease dataset with features like age, chest pain type, blood pressure, and cholesterol levels.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 bg-dark">
+                                <div class="card-body">
+                                    <h4 class="card-title text-primary">Diabetes</h4>
+                                    <p class="card-text">Utilizes a Logistic Regression model trained on the Pima Indians Diabetes dataset, analyzing metrics like glucose levels, BMI, and insulin.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 bg-dark">
+                                <div class="card-body">
+                                    <h4 class="card-title text-warning">Pneumonia</h4>
+                                    <p class="card-text">Employs a symptom-based approach using temperature, oxygen levels, and reported symptoms to assess pneumonia risk.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Technologies Used</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Backend</h4>
+                            <ul>
+                                <li>Flask (Python web framework)</li>
+                                <li>scikit-learn (Machine learning library)</li>
+                                <li>pandas (Data manipulation)</li>
+                                <li>numpy (Numerical operations)</li>
+                                <li>SQLAlchemy (Database ORM)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Frontend</h4>
+                            <ul>
+                                <li>HTML5/CSS3</li>
+                                <li>Bootstrap (Responsive design)</li>
+                                <li>JavaScript</li>
+                                <li>Chart.js (Data visualization)</li>
+                                <li>Font Awesome (Icons)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Medical Disclaimer</h2>
+                    <div class="alert alert-warning">
+                        <h5>For Educational Purposes Only</h5>
+                        <p>The Disease Prediction System is an educational tool and should not be used as a substitute for professional medical advice, diagnosis, or treatment.</p>
+                        
+                        <p>Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+                        
+                        <p>Never disregard professional medical advice or delay in seeking it because of something you have read on this website.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Accuracy & Limitations</h2>
+                    <p>While our machine learning models are trained on established medical datasets, they have several important limitations:</p>
+                    
+                    <ul>
+                        <li>Models are trained on specific populations that may not represent all individuals</li>
+                        <li>Predictions are based on statistical patterns, not individualized medical analysis</li>
+                        <li>Models cannot capture all possible health factors and interactions</li>
+                        <li>Simplifications are made to make the system accessible to non-medical users</li>
+                    </ul>
+                    
+                    <p>Prediction accuracy varies by model and can be affected by data quality and completeness.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Privacy</h2>
+                    <p>We take data privacy seriously. The Disease Prediction System:</p>
+                    
+                    <ul>
+                        <li>Does not store personally identifiable information</li>
+                        <li>Uses prediction data only for the purpose of providing results</li>
+                        <li>Does not share user data with third parties</li>
+                        <li>Stores minimal data necessary for the service to function</li>
+                    </ul>
+                    
+                    <p>All data is processed and stored securely following best practices for health data protection.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

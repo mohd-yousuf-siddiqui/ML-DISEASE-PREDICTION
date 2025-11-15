@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}Heart Disease Prediction{% endblock %}
+
+{% block content %}
+<div class="container my-5 form-container">
+    <div class="text-center mb-5">
+        <h1><i class="fas fa-heartbeat text-danger me-3"></i>Heart Disease Risk Assessment</h1>
+        <p class="lead">Enter your health parameters to evaluate your heart disease risk.</p>
+        <div class="alert alert-info">
+            <i class="fas fa-notes-medical me-2"></i>Please use values from your recent medical check-up or test reports. If you don't have these values, please consult your healthcare provider for a proper check-up.
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body p-4">
+            <form method="POST" action="{{ url_for('heart_disease') }}">
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="number" class="form-control {% if errors and errors.get('age') %}is-invalid{% endif %}" 
+                            id="age" name="age" min="1" max="120" 
+                            value="{{ form_data.get('age', '') }}" required>
+                        {% if errors and errors.get('age') %}
+                        <div class="invalid-feedback">{{ errors.get('age') }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Sex</label>
+                        <div class="d-flex">
+                            <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="sex" id="sex-male" value="1"
+                                    {% if form_data and form_data.get('sex') == '1' %}checked{% endif %} required>
+                                <label class="form-check-label" for="sex-male">Male</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="sex" id="sex-female" value="0"
+                                    {% if form_data and form_data.get('sex') == '0' %}checked{% endif %} required>
+                                <label class="form-check-label" for="sex-female">Female</label>
+                            </div>
+                        </div>
+                        {% if errors and errors.get('sex') %}
+                        <div class="text-danger small mt-1">{{ errors.get('sex') }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="cp" class="form-label">Chest Pain Type <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Typical Angina: Pressure/squeezing in chest, Atypical: Unusual chest pain pattern, Non-Anginal: Non-heart related chest pain, Asymptomatic: No chest pain"></i></label>
+                        <select class="form-select {% if errors and errors.get('cp') %}is-invalid{% endif %}" 
+                            id="cp" name="cp" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('cp') %}selected{% endif %}>Select chest pain type</option>
+                            <option value="0" {% if form_data and form_data.get('cp') == '0' %}selected{% endif %}>Typical Angina</option>
+                            <option value="1" {% if form_data and form_data.get('cp') == '1' %}selected{% endif %}>Atypical Angina</option>
+                            <option value="2" {% if form_data and form_data.get('cp') == '2' %}selected{% endif %}>Non-Anginal Pain</option>
+                            <option value="3" {% if form_data and form_data.get('cp') == '3' %}selected{% endif %}>Asymptomatic</option>
+                        </select>
+                        {% if errors and errors.get('cp') %}
+                        <div class="invalid-feedback">{{ errors.get('cp') }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="trestbps" class="form-label">Resting Blood Pressure (mm Hg)</label>
+                        <input type="number" class="form-control {% if errors and errors.get('trestbps') %}is-invalid{% endif %}" 
+                            id="trestbps" name="trestbps" min="50" max="250" 
+                            value="{{ form_data.get('trestbps', '') }}" required>
+                        {% if errors and errors.get('trestbps') %}
+                        <div class="invalid-feedback">{{ errors.get('trestbps') }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="chol" class="form-label">Serum Cholesterol (mg/dl)</label>
+                        <input type="number" class="form-control {% if errors and errors.get('chol') %}is-invalid{% endif %}" 
+                            id="chol" name="chol" min="100" max="600" 
+                            value="{{ form_data.get('chol', '') }}" required>
+                        {% if errors and errors.get('chol') %}
+                        <div class="invalid-feedback">{{ errors.get('chol') }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Fasting Blood Sugar > 120 mg/dl</label>
+                        <div class="d-flex">
+                            <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="fbs" id="fbs-true" value="1"
+                                    {% if form_data and form_data.get('fbs') == '1' %}checked{% endif %} required>
+                                <label class="form-check-label" for="fbs-true">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="fbs" id="fbs-false" value="0"
+                                    {% if form_data and form_data.get('fbs') == '0' %}checked{% endif %} required>
+                                <label class="form-check-label" for="fbs-false">No</label>
+                            </div>
+                        </div>
+                        {% if errors and errors.get('fbs') %}
+                        <div class="text-danger small mt-1">{{ errors.get('fbs') }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="restecg" class="form-label">Resting Electrocardiographic Results</label>
+                        <select class="form-select {% if errors and errors.get('restecg') %}is-invalid{% endif %}" 
+                            id="restecg" name="restecg" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('restecg') %}selected{% endif %}>Select ECG results</option>
+                            <option value="0" {% if form_data and form_data.get('restecg') == '0' %}selected{% endif %}>Normal</option>
+                            <option value="1" {% if form_data and form_data.get('restecg') == '1' %}selected{% endif %}>ST-T Wave Abnormality</option>
+                            <option value="2" {% if form_data and form_data.get('restecg') == '2' %}selected{% endif %}>Left Ventricular Hypertrophy</option>
+                        </select>
+                        {% if errors and errors.get('restecg') %}
+                        <div class="invalid-feedback">{{ errors.get('restecg') }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="thalach" class="form-label">Maximum Heart Rate Achieved</label>
+                        <input type="number" class="form-control {% if errors and errors.get('thalach') %}is-invalid{% endif %}" 
+                            id="thalach" name="thalach" min="60" max="220" 
+                            value="{{ form_data.get('thalach', '') }}" required>
+                        {% if errors and errors.get('thalach') %}
+                        <div class="invalid-feedback">{{ errors.get('thalach') }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Exercise Induced Angina</label>
+                        <div class="d-flex">
+                            <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="exang" id="exang-yes" value="1"
+                                    {% if form_data and form_data.get('exang') == '1' %}checked{% endif %} required>
+                                <label class="form-check-label" for="exang-yes">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="exang" id="exang-no" value="0"
+                                    {% if form_data and form_data.get('exang') == '0' %}checked{% endif %} required>
+                                <label class="form-check-label" for="exang-no">No</label>
+                            </div>
+                        </div>
+                        {% if errors and errors.get('exang') %}
+                        <div class="text-danger small mt-1">{{ errors.get('exang') }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="oldpeak" class="form-label">ST Depression Induced by Exercise Relative to Rest</label>
+                        <input type="number" step="0.1" class="form-control {% if errors and errors.get('oldpeak') %}is-invalid{% endif %}" 
+                            id="oldpeak" name="oldpeak" min="0" max="10" 
+                            value="{{ form_data.get('oldpeak', '') }}" required>
+                        {% if errors and errors.get('oldpeak') %}
+                        <div class="invalid-feedback">{{ errors.get('oldpeak') }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <label for="slope" class="form-label">Slope of the Peak Exercise ST Segment</label>
+                        <select class="form-select {% if errors and errors.get('slope') %}is-invalid{% endif %}" 
+                            id="slope" name="slope" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('slope') %}selected{% endif %}>Select slope</option>
+                            <option value="0" {% if form_data and form_data.get('slope') == '0' %}selected{% endif %}>Upsloping</option>
+                            <option value="1" {% if form_data and form_data.get('slope') == '1' %}selected{% endif %}>Flat</option>
+                            <option value="2" {% if form_data and form_data.get('slope') == '2' %}selected{% endif %}>Downsloping</option>
+                        </select>
+                        {% if errors and errors.get('slope') %}
+                        <div class="invalid-feedback">{{ errors.get('slope') }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="ca" class="form-label">Number of Major Vessels Colored by Fluoroscopy</label>
+                        <select class="form-select {% if errors and errors.get('ca') %}is-invalid{% endif %}" 
+                            id="ca" name="ca" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('ca') %}selected{% endif %}>Select number</option>
+                            <option value="0" {% if form_data and form_data.get('ca') == '0' %}selected{% endif %}>0</option>
+                            <option value="1" {% if form_data and form_data.get('ca') == '1' %}selected{% endif %}>1</option>
+                            <option value="2" {% if form_data and form_data.get('ca') == '2' %}selected{% endif %}>2</option>
+                            <option value="3" {% if form_data and form_data.get('ca') == '3' %}selected{% endif %}>3</option>
+                            <option value="4" {% if form_data and form_data.get('ca') == '4' %}selected{% endif %}>4</option>
+                        </select>
+                        {% if errors and errors.get('ca') %}
+                        <div class="invalid-feedback">{{ errors.get('ca') }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="thal" class="form-label">Thalassemia</label>
+                        <select class="form-select {% if errors and errors.get('thal') %}is-invalid{% endif %}" 
+                            id="thal" name="thal" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('thal') %}selected{% endif %}>Select thalassemia type</option>
+                            <option value="0" {% if form_data and form_data.get('thal') == '0' %}selected{% endif %}>Normal</option>
+                            <option value="1" {% if form_data and form_data.get('thal') == '1' %}selected{% endif %}>Fixed Defect</option>
+                            <option value="2" {% if form_data and form_data.get('thal') == '2' %}selected{% endif %}>Reversible Defect</option>
+                            <option value="3" {% if form_data and form_data.get('thal') == '3' %}selected{% endif %}>Unknown</option>
+                        </select>
+                        {% if errors and errors.get('thal') %}
+                        <div class="invalid-feedback">{{ errors.get('thal') }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                    <button type="submit" class="btn btn-danger btn-lg">Predict Heart Disease Risk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card mt-4 bg-dark">
+        <div class="card-body">
+            <h3 class="card-title">About Heart Disease Prediction</h3>
+            <p>This heart disease prediction tool uses a machine learning model trained on the Cleveland Heart Disease dataset from the UCI Machine Learning Repository.</p>
+            
+            <h4 class="mt-4">Understanding the Parameters:</h4>
+            <ul>
+                <li><strong>Chest Pain Type:</strong> Different types of chest pain can indicate different heart conditions.</li>
+                <li><strong>Resting Blood Pressure:</strong> High blood pressure is a major risk factor for heart disease.</li>
+                <li><strong>Serum Cholesterol:</strong> High cholesterol can lead to plaque buildup in arteries.</li>
+                <li><strong>Fasting Blood Sugar:</strong> Elevated blood sugar can damage blood vessels and the nerves that control your heart.</li>
+                <li><strong>Resting ECG:</strong> An electrocardiogram measures the electrical activity of your heart.</li>
+                <li><strong>Maximum Heart Rate:</strong> The highest heart rate achieved during exercise testing.</li>
+                <li><strong>Exercise Induced Angina:</strong> Chest pain triggered by physical activity.</li>
+                <li><strong>ST Depression:</strong> An indicator on an electrocardiogram that can suggest heart problems.</li>
+                <li><strong>Slope of Peak Exercise ST Segment:</strong> Another ECG indicator related to heart function.</li>
+                <li><strong>Number of Major Vessels:</strong> Indicates the number of major blood vessels supplying the heart that are blocked.</li>
+                <li><strong>Thalassemia:</strong> A blood disorder that can affect heart function.</li>
+            </ul>
+            
+            <div class="alert alert-info mt-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-info-circle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="alert-heading">Important Note</h5>
+                        <p class="mb-0">This prediction is based on statistical models and should not replace professional medical advice. Always consult with a healthcare provider for proper diagnosis and treatment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

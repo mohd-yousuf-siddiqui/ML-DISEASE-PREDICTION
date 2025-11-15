@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Pneumonia Prediction{% endblock %}
+
+{% block content %}
+<div class="container my-5 form-container">
+    <div class="text-center mb-5">
+        <h1><i class="fas fa-lungs text-warning me-3"></i>Pneumonia Risk Assessment</h1>
+        <p class="lead">Enter your symptoms and vitals to evaluate your pneumonia risk.</p>
+    </div>
+    
+    <div class="card">
+        <div class="card-body p-4">
+            <form method="POST" action="{{ url_for('pneumonia') }}">
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="temperature" class="form-label">Body Temperature (°F)</label>
+                        <input type="number" step="0.1" class="form-control {% if errors and errors.get('temperature') %}is-invalid{% endif %}" 
+                            id="temperature" name="temperature" min="95" max="108" 
+                            value="{{ form_data.get('temperature', '98.6') }}" required>
+                        {% if errors and errors.get('temperature') %}
+                        <div class="invalid-feedback">{{ errors.get('temperature') }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Normal range: 97.7-99.5°F, Fever: >100.4°F</small>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="oxygen_level" class="form-label">Blood Oxygen Level (SpO2 %)</label>
+                        <input type="number" class="form-control {% if errors and errors.get('oxygen_level') %}is-invalid{% endif %}" 
+                            id="oxygen_level" name="oxygen_level" min="70" max="100" 
+                            value="{{ form_data.get('oxygen_level', '98') }}" required>
+                        {% if errors and errors.get('oxygen_level') %}
+                        <div class="invalid-feedback">{{ errors.get('oxygen_level') }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Normal: 95-100%, Concerning: <95%, Critical: <90%</small>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="cough_severity" class="form-label">Cough Severity (0-10)</label>
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range me-3 {% if errors and errors.get('cough_severity') %}is-invalid{% endif %}" 
+                                id="cough_severity" name="cough_severity" min="0" max="10" step="1" 
+                                value="{{ form_data.get('cough_severity', '0') }}" required>
+                            <span id="cough_severity-value" class="badge bg-primary">0</span>
+                        </div>
+                        {% if errors and errors.get('cough_severity') %}
+                        <div class="invalid-feedback d-block">{{ errors.get('cough_severity') }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">0 = No cough, 10 = Severe persistent cough</small>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="breathing_difficulty" class="form-label">Breathing Difficulty (0-10)</label>
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range me-3 {% if errors and errors.get('breathing_difficulty') %}is-invalid{% endif %}" 
+                                id="breathing_difficulty" name="breathing_difficulty" min="0" max="10" step="1" 
+                                value="{{ form_data.get('breathing_difficulty', '0') }}" required>
+                            <span id="breathing_difficulty-value" class="badge bg-primary">0</span>
+                        </div>
+                        {% if errors and errors.get('breathing_difficulty') %}
+                        <div class="invalid-feedback d-block">{{ errors.get('breathing_difficulty') }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">0 = Normal breathing, 10 = Severe shortness of breath</small>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card bg-dark">
+                            <div class="card-body">
+                                <h5 class="card-title">Do you have any of these additional symptoms?</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="symptom_chest_pain" name="symptom_chest_pain">
+                                            <label class="form-check-label" for="symptom_chest_pain">Chest pain when breathing or coughing</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="symptom_fatigue" name="symptom_fatigue">
+                                            <label class="form-check-label" for="symptom_fatigue">Fatigue</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="symptom_sweating" name="symptom_sweating">
+                                            <label class="form-check-label" for="symptom_sweating">Sweating and chills</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="symptom_nausea" name="symptom_nausea">
+                                            <label class="form-check-label" for="symptom_nausea">Nausea, vomiting or diarrhea</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="symptom_confusion" name="symptom_confusion">
+                                            <label class="form-check-label" for="symptom_confusion">Confusion or changes in mental awareness</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="symptom_blue_lips" name="symptom_blue_lips">
+                                            <label class="form-check-label" for="symptom_blue_lips">Blue lips or face</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted mt-3">Note: These symptoms are used for informational purposes and don't directly affect the prediction model in this demo.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                    <button type="submit" class="btn btn-warning btn-lg">Assess Pneumonia Risk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card mt-4 bg-dark">
+        <div class="card-body">
+            <h3 class="card-title">About Pneumonia Risk Assessment</h3>
+            <p>This pneumonia risk assessment tool uses a simplified approach based on common symptoms and vital signs associated with pneumonia. Note that a complete pneumonia diagnosis typically involves medical imaging (chest X-rays) and laboratory tests.</p>
+            
+            <h4 class="mt-4">Understanding the Parameters:</h4>
+            <ul>
+                <li><strong>Body Temperature:</strong> Fever is a common response to infection, including pneumonia.</li>
+                <li><strong>Blood Oxygen Level (SpO2):</strong> Pneumonia can impair oxygen exchange in the lungs, leading to reduced oxygen levels in the blood.</li>
+                <li><strong>Cough Severity:</strong> A persistent cough, often with phlegm, is a hallmark symptom of pneumonia.</li>
+                <li><strong>Breathing Difficulty:</strong> Pneumonia can cause shortness of breath due to inflammation and fluid in the lungs.</li>
+            </ul>
+            
+            <h4 class="mt-4">Types of Pneumonia:</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Community-acquired pneumonia:</h5>
+                    <p>Occurs outside of hospitals or healthcare facilities. Common causes include bacteria, viruses, and fungi.</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Hospital-acquired pneumonia:</h5>
+                    <p>Develops during or after a hospital stay. Often caused by more resistant bacteria and may be more serious.</p>
+                </div>
+            </div>
+            
+            <div class="alert alert-warning mt-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h5 class="alert-heading">Important Warning</h5>
+                        <p class="mb-0">If you're experiencing severe shortness of breath, persistent high fever, confusion, or blue discoloration of your lips or face, seek emergency medical care immediately. This tool is for educational purposes only and cannot replace medical diagnosis.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update the value display for range inputs
+        const coughRange = document.getElementById('cough_severity');
+        const coughValue = document.getElementById('cough_severity-value');
+        
+        const breathingRange = document.getElementById('breathing_difficulty');
+        const breathingValue = document.getElementById('breathing_difficulty-value');
+        
+        if (coughRange && coughValue) {
+            coughValue.textContent = coughRange.value;
+            coughRange.addEventListener('input', function() {
+                coughValue.textContent = this.value;
+                
+                // Update badge color based on severity
+                coughValue.className = 'badge';
+                if (this.value <= 3) {
+                    coughValue.classList.add('bg-success');
+                } else if (this.value <= 7) {
+                    coughValue.classList.add('bg-warning');
+                } else {
+                    coughValue.classList.add('bg-danger');
+                }
+            });
+        }
+        
+        if (breathingRange && breathingValue) {
+            breathingValue.textContent = breathingRange.value;
+            breathingRange.addEventListener('input', function() {
+                breathingValue.textContent = this.value;
+                
+                // Update badge color based on severity
+                breathingValue.className = 'badge';
+                if (this.value <= 3) {
+                    breathingValue.classList.add('bg-success');
+                } else if (this.value <= 7) {
+                    breathingValue.classList.add('bg-warning');
+                } else {
+                    breathingValue.classList.add('bg-danger');
+                }
+            });
+        }
+        
+        // Trigger input events to set initial colors
+        if (coughRange) {
+            coughRange.dispatchEvent(new Event('input'));
+        }
+        if (breathingRange) {
+            breathingRange.dispatchEvent(new Event('input'));
+        }
+    });
+</script>
+{% endblock %}
